@@ -7,7 +7,7 @@ interface EnvConfig {
 }
 
 export const env: EnvConfig = {
-  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  apiUrl: import.meta.env.VITE_API_URL || '/.netlify/functions/api',
   stripePublishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '',
   isDevelopment: import.meta.env.DEV || false,
   isProduction: import.meta.env.PROD || false,
