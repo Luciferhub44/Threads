@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: threads-charity
+    env: node
+    buildCommand: yarn install && yarn build
+    startCommand: yarn start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: YARN_VERSION
+        value: 1.22.0
+      - key: PORT
+        value: 3000
+      - key: VITE_STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_PAYPAL_CLIENT_ID
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true
