@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { ProductPage } from './pages/ProductPage';
@@ -13,12 +13,13 @@ import { stripePromise } from './utils/stripe';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ScrollToTop } from './utils/ScrollToTop';
 import { loadContent } from './utils/contentManager';
+import { StoreSettings } from './types';
 
 const App: React.FC = () => {
   const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [homepageContent, setHomepageContent] = React.useState(loadContent());
-  const [settings, setSettings] = React.useState<StoreSettings>(() => ({
+  const [settings] = React.useState<StoreSettings>(() => ({
     storeName: 'Threads Charity',
     logo: localStorage.getItem('store_logo') || null,
     emailNotifications: true,

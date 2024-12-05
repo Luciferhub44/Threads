@@ -2,7 +2,6 @@ import React from 'react';
 import { HomepageSection } from '../../../types';
 import { SectionEditor } from '../content/SectionEditor';
 import { NewSectionModal } from '../content/NewSectionModal';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { saveContent, validateContent, reorderSections, MIN_SECTIONS, MAX_SECTIONS } from '../../../utils/contentManager';
 import { GripVertical, Eye, EyeOff, Plus } from 'lucide-react';
 import { toast } from '../../../utils/toast';
@@ -18,13 +17,20 @@ export const ContentTab: React.FC<ContentTabProps> = ({ sections, onUpdate }) =>
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveStatus, setSaveStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [showNewSectionModal, setShowNewSectionModal] = React.useState(false);
+  const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
 
-    const items = Array.from(localSections);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    
+    const items = [...localSections];
+    const draggedItem = items[draggedIndex];
+    items.splice(draggedIndex, 1);
+    items.splice(index, 0, draggedItem);
 
     const updatedSections = items.map((item, index) => ({
       ...item,
@@ -32,7 +38,14 @@ export const ContentTab: React.FC<ContentTabProps> = ({ sections, onUpdate }) =>
     }));
 
     setLocalSections(updatedSections);
-    handleSave(updatedSections);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    if (draggedIndex !== null) {
+      handleSave(localSections);
+      setDraggedIndex(null);
+    }
   };
 
   const handleToggleVisibility = (sectionId: string) => {
@@ -142,77 +155,60 @@ export const ContentTab: React.FC<ContentTabProps> = ({ sections, onUpdate }) =>
           </button>
         </div>
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="sections">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className="divide-y divide-gray-200"
-              >
-                {localSections.map((section, index) => (
-                  <Draggable
-                    key={section.id}
-                    draggableId={section.id}
-                    index={index}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className="p-4 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div
-                            {...provided.dragHandleProps}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <GripVertical className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-sm font-medium text-gray-900">
-                              {section.title}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                              {section.type}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => handleToggleVisibility(section.id)}
-                            className={`p-2 rounded-full ${
-                              section.isVisible
-                                ? 'text-green-600 hover:text-green-700'
-                                : 'text-gray-400 hover:text-gray-500'
-                            }`}
-                          >
-                            {section.isVisible ? (
-                              <Eye className="h-5 w-5" />
-                            ) : (
-                              <EyeOff className="h-5 w-5" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleDuplicate(section.id)}
-                            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-700 font-medium"
-                          >
-                            Duplicate
-                          </button>
-                          <button
-                            onClick={() => setEditingSection(section.id)}
-                            className="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium"
-                          >
-                            Edit
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+        <div className="divide-y divide-gray-200">
+          {localSections.map((section, index) => (
+            <div
+              key={section.id}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`p-4 hover:bg-gray-50 transition-colors ${
+                draggedIndex === index ? 'opacity-50' : ''
+              }`}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="cursor-move text-gray-400 hover:text-gray-600">
+                  <GripVertical className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-gray-900">
+                    {section.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {section.type}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleToggleVisibility(section.id)}
+                  className={`p-2 rounded-full ${
+                    section.isVisible
+                      ? 'text-green-600 hover:text-green-700'
+                      : 'text-gray-400 hover:text-gray-500'
+                  }`}
+                >
+                  {section.isVisible ? (
+                    <Eye className="h-5 w-5" />
+                  ) : (
+                    <EyeOff className="h-5 w-5" />
+                  )}
+                </button>
+                <button
+                  onClick={() => handleDuplicate(section.id)}
+                  className="px-3 py-1 text-sm text-gray-600 hover:text-gray-700 font-medium"
+                >
+                  Duplicate
+                </button>
+                <button
+                  onClick={() => setEditingSection(section.id)}
+                  className="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  Edit
+                </button>
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+            </div>
+          ))}
+        </div>
       </div>
 
       {editingSection && (

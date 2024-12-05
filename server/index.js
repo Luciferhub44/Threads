@@ -1,50 +1,51 @@
 import express from 'express';
 import cors from 'cors';
-import Stripe from 'stripe';
 import dotenv from 'dotenv';
-import adminRoutes from './routes/admin.js';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, fileURLToPath } from 'path';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
+import connectDB from './config/database.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const app = express();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Connect to MongoDB
+connectDB();
 
+const app = express();
+
+// Security middleware
+app.use(helmet());
+
+// Enable CORS
 app.use(cors());
+
+// Parse JSON bodies
 app.use(express.json());
 
-// Admin routes
-app.use('/api/admin', adminRoutes);
+// Enable compression
+app.use(compression());
+
+// Logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// API Routes
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check endpoint for Render
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
-});
-
-app.post('/api/create-payment-intent', async (req, res) => {
-  try {
-    const { amount } = req.body;
-    
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({ error: 'Invalid amount' });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: 'usd',
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
-
-    res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    res.status(500).json({ error: 'Payment processing failed' });
-  }
 });
 
 // Serve static files in production
@@ -57,7 +58,9 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// Error handling middleware
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});

@@ -1,4 +1,4 @@
-import { config } from '../config/payment';
+import { env } from '../config/env';
 
 interface AnalyticsEvent {
   category: string;
@@ -8,7 +8,7 @@ interface AnalyticsEvent {
 }
 
 export const trackEvent = ({ category, action, label, value }: AnalyticsEvent): void => {
-  if (config.environment === 'production' && window.gtag) {
+  if (!env.isDevelopment && window.gtag) {
     window.gtag('event', action, {
       event_category: category,
       event_label: label,

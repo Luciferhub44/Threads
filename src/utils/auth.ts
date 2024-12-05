@@ -1,26 +1,25 @@
-import { jwtDecode } from "jwt-decode";
-
-interface DecodedToken {
-  adminId: string;
-  exp: number;
-}
+const TOKEN_KEY = 'adminToken';
 
 export const isAuthenticated = (): boolean => {
-  const token = localStorage.getItem('adminToken');
-  if (!token) return true; // For development, always return true
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return false;
 
   try {
-    const decoded = jwtDecode(token) as DecodedToken;
-    return decoded.exp * 1000 > Date.now();
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 > Date.now();
   } catch {
-    return true; // For development, always return true
+    return false;
   }
 };
 
 export const setAuthToken = (token: string): void => {
-  localStorage.setItem('adminToken', token);
+  localStorage.setItem(TOKEN_KEY, token);
+};
+
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem(TOKEN_KEY);
 };
 
 export const clearAuthToken = (): void => {
-  localStorage.removeItem('adminToken');
+  localStorage.removeItem(TOKEN_KEY);
 };

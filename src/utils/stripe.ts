@@ -1,7 +1,8 @@
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentResult } from '../types';
+import { env } from '../config/env';
 
-export const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+export const stripePromise = loadStripe(env.stripePublishableKey);
 
 export const processStripePayment = async (amount: number): Promise<PaymentResult> => {
   const stripe = await stripePromise;
@@ -14,7 +15,7 @@ export const processStripePayment = async (amount: number): Promise<PaymentResul
       };
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/create-payment-intent`, {
+    const response = await fetch(`${env.apiUrl}/api/create-payment-intent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

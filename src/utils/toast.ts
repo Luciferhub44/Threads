@@ -7,8 +7,12 @@ class Toast {
   private createToast(message: string, type: 'success' | 'error' | 'info', options: ToastOptions = {}) {
     const { duration = 3000, position = 'top-right' } = options;
     
+    // Remove any existing toasts
+    const existingToasts = document.querySelectorAll('.toast-notification');
+    existingToasts.forEach(toast => document.body.removeChild(toast));
+    
     const toast = document.createElement('div');
-    toast.className = `fixed ${position} m-4 p-4 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-y-2 opacity-0`;
+    toast.className = `fixed ${position} m-4 p-4 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-y-2 opacity-0 toast-notification z-50`;
     
     switch (type) {
       case 'success':

@@ -13,23 +13,22 @@ export default defineConfig({
   build: {
     sourcemap: false,
     minify: 'terser',
-    outDir: 'dist',
-    emptyOutDir: true,
     terserOptions: {
       compress: {
         drop_console: true,
         drop_debugger: true
       }
     },
-    reportCompressedSize: false,
     cssMinify: true,
     target: 'esnext',
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          payment: ['@stripe/stripe-js', '@stripe/react-stripe-js']
+          vendor: ['react', 'react-dom'],
+          payment: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
+          router: ['react-router-dom'],
+          motion: ['framer-motion']
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
@@ -44,11 +43,22 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom'],
+    exclude: ['@stripe/stripe-js'],
     esbuildOptions: {
       target: 'esnext',
       supported: {
         'top-level-await': true
       },
+    }
+  },
+  server: {
+    port: 5173,
+    strictPort: true,
+    headers: {
+      'Cache-Control': 'public, max-age=31536000',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block'
     }
   }
 });
