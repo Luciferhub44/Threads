@@ -11,20 +11,16 @@ export default defineConfig({
     }
   },
   build: {
-    sourcemap: false,
-    minify: 'terser',
     outDir: 'dist',
     emptyOutDir: true,
+    sourcemap: false,
+    minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug']
+        drop_debugger: true
       }
     },
-    cssMinify: true,
-    target: 'esnext',
-    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -32,36 +28,16 @@ export default defineConfig({
           payment: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
           motion: ['framer-motion'],
           icons: ['lucide-react']
-        },
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        }
       }
     }
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom'],
-    exclude: ['@stripe/stripe-js']
   },
   server: {
     port: 5173,
-    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false
-      }
-    }
-  },
-  preview: {
-    port: 4173,
-    strictPort: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false
+        changeOrigin: true
       }
     }
   }
