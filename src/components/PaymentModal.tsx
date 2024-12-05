@@ -1,10 +1,10 @@
 import React from 'react';
-import { PayPalButtons } from '@paypal/react-paypal-js';
-import { Elements } from '@stripe/react-stripe-js';
 import { processStripePayment } from '../utils/stripe';
 import { StripePaymentForm } from './StripePaymentForm';
 import { X, CreditCard } from 'lucide-react';
-import { stripePromise } from '../utils/stripe';
+import { trackEvent } from '../utils/analytics';
+import { LoadingSpinner } from './LoadingSpinner';
+import { config } from '../config/payment';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -13,13 +13,12 @@ interface PaymentModalProps {
   onPaymentSuccess: () => void;
 }
 
-export const PaymentModal: React.FC<PaymentModalProps> = ({
+const PaymentModal: React.FC<PaymentModalProps> = ({
   isOpen,
   onClose,
   amount,
   onPaymentSuccess,
 }) => {
-  const [paymentMethod, setPaymentMethod] = React.useState<'stripe' | 'paypal'>('stripe');
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isSuccess, setIsSuccess] = React.useState(false);
@@ -36,18 +35,39 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     try {
       setIsProcessing(true);
       setError(null);
+      trackEvent({
+        category: 'Payment',
+        action: 'InitiateStripePayment',
+        value: amount
+      });
+
       const result = await processStripePayment(amount);
       
       if (result.success) {
         setIsSuccess(true);
+        trackEvent({
+          category: 'Payment',
+          action: 'StripePaymentSuccess',
+          value: amount
+        });
         setTimeout(() => {
           onPaymentSuccess();
           onClose();
         }, 2000);
       } else {
+        trackEvent({
+          category: 'Payment',
+          action: 'StripePaymentError',
+          label: result.error?.code
+        });
         setError(result.error?.message || 'Payment failed');
       }
     } catch (err: unknown) {
+      trackEvent({
+        category: 'Payment',
+        action: 'StripePaymentError',
+        label: 'UnexpectedError'
+      });
       setError('Payment failed. Please try again.');
     } finally {
       setIsProcessing(false);
@@ -95,79 +115,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           )}
 
           <div className="space-y-6">
-            <div className="flex justify-center space-x-4">
-              <button
-                className={`px-6 py-3 rounded-lg flex items-center space-x-2 ${
-                  paymentMethod === 'stripe'
-                    ? 'bg-red-500 text-white'
-                    : 'bg-gray-100 text-gray-700'
-                } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => setPaymentMethod('stripe')}
-                disabled={isProcessing}
-              >
-                <CreditCard className="h-5 w-5" />
-                <span>Credit Card</span>
-              </button>
-              <button
-                className={`px-6 py-3 rounded-lg ${
-                  paymentMethod === 'paypal'
-                    ? 'bg-red-500 text-white'
-                    : 'bg-gray-100 text-gray-700'
-                } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => setPaymentMethod('paypal')}
-                disabled={isProcessing}
-              >
-                PayPal
-              </button>
-            </div>
-
             {error && (
               <div className="text-red-500 text-sm text-center">{error}</div>
             )}
-            {paymentMethod === 'stripe' ? (
-              <Elements stripe={stripePromise} options={{ appearance: { theme: 'stripe' } }}>
-                <StripePaymentForm
-                  onSubmit={handleStripePayment}
-                  isProcessing={isProcessing}
-                  error={error}
-                />
-              </Elements>
-            ) : (
-              <PayPalButtons
-                createOrder={(data, actions) => {
-                  return actions.order.create({
-                    intent: 'CAPTURE',
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: (amount / 100).toFixed(2),
-                        },
-                      },
-                    ],
-                  });
-                }}
-                onApprove={async (data, actions) => {
-                  try {
-                    const details = await actions.order!.capture();
-                    if (details.status !== 'COMPLETED') {
-                      throw new Error('Payment not completed');
-                    }
-                    onPaymentSuccess();
-                    onClose();
-                  } catch (error) {
-                    setError('PayPal payment failed. Please try again.');
-                  }
-                }}
-                onError={() => {
-                  setError('PayPal encountered an error. Please try again.');
-                }}
-                style={{ layout: 'vertical' }}
-                disabled={isProcessing}
-              />
-            )}
+            <StripePaymentForm
+              onSubmit={handleStripePayment}
+              isProcessing={isProcessing}
+              error={error}
+            />
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export { PaymentModal };

@@ -2,14 +2,24 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { setAuthToken, validateAdminPassword } from '../utils/auth';
 
-export const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  isLoggedIn: boolean;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ isLoggedIn }) => {
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/admin';
+  React.useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/admin');
+    }
+  }, [isLoggedIn, navigate]);
+
+  const from = (location.state as any)?.from?.pathname || '/admin';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +29,7 @@ export const LoginPage: React.FC = () => {
     try {
       if (validateAdminPassword(password)) {
         setAuthToken('admin-token');
+        window.dispatchEvent(new Event('auth-change'));
         navigate(from, { replace: true });
       } else {
         throw new Error('Invalid password');

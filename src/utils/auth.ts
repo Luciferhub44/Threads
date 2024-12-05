@@ -1,5 +1,5 @@
 const TOKEN_KEY = 'adminToken';
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
 
 interface DecodedToken {
   role: string;
@@ -29,7 +29,7 @@ export const isAuthenticated = (): boolean => {
 };
 
 export const validateAdminPassword = (password: string): boolean => {
-  return password === ADMIN_PASSWORD && ADMIN_PASSWORD !== 'your_secure_admin_password';
+  return password === ADMIN_PASSWORD;
 };
 
 export const setAuthToken = (token: string): void => {
@@ -42,4 +42,5 @@ export const clearAuthToken = (): void => {
   localStorage.removeItem(TOKEN_KEY);
   // Trigger a custom event to notify other parts of the app
   window.dispatchEvent(new Event('auth-change'));
+  window.location.href = '/login';
 };

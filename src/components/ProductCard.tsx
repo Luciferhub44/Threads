@@ -1,36 +1,58 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { m } from 'framer-motion';
 import { Product } from '../types';
 import { formatCurrency } from '../utils/formatCurrency';
 import { CardMedal } from './CardMedal';
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product, size: string) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   const [selectedSize, setSelectedSize] = React.useState(product.sizes[0]);
   const [isHovered, setIsHovered] = React.useState(false);
+  const [isImageLoading, setIsImageLoading] = React.useState(true);
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+  };
 
   return (
-    <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg"
+    <m.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative">
         <CardMedal label="Donate" />
+        <Link to={`/product/${product.id}`} className="absolute inset-0 z-10">
+          <span className="sr-only">View {product.name}</span>
+        </Link>
+        {isImageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <LoadingSpinner size="md" className="text-red-500" />
+          </div>
+        )}
         <img
           src={product.image}
           alt={product.name}
+          loading="lazy"
+          onLoad={handleImageLoad}
           className={`w-full h-64 object-cover transition-transform duration-300 ${
             isHovered ? 'scale-105' : ''
-          }`}
+          } ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
         />
       </div>
       <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
-        <p className="mt-2 text-gray-600">{product.description}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
+        <p className="mt-2 text-gray-600 text-sm line-clamp-2">{product.description}</p>
         <div className="mt-4">
           <label className="text-sm font-medium text-gray-700 block mb-2">Select Size:</label>
           <select
@@ -55,6 +77,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
           </button>
         </div>
       </div>
-    </div>
+    </m.div>
   );
 };
+
+export { ProductCard };

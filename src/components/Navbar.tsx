@@ -1,13 +1,18 @@
 import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart, Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   cartItemsCount: number;
   onCartClick: () => void;
+  logo?: string | null;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick, logo }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHomePage = location.pathname === '/';
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -48,11 +53,19 @@ export const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) =
           </button>
 
           <div className="flex-shrink-0 w-32">
-            <img src="/threads-logo.png" alt="Threads" className="w-full h-auto" />
+            <Link to="/">
+              <img
+                src={logo || '/threads-logo.png'}
+                alt="Threads - Donate Warmth, Share Comfort" 
+                className="w-full h-auto object-contain"
+                loading="eager"
+                priority="high"
+              />
+            </Link>
           </div>
           
           <div className="hidden md:flex space-x-8">
-            {navLinks.map((link) => (
+            {isHomePage ? navLinks.map((link) => (
               <a
                 key={link.id}
                 href={`/#${link.id}`}
@@ -64,7 +77,11 @@ export const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) =
               >
                 {link.name}
               </a>
-            ))}
+            )) : (
+              <Link to="/" className="text-gray-600 hover:text-red-500 transition-colors px-3 py-2">
+                Back to Home
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center space-x-8">
@@ -86,7 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) =
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col space-y-4">
-              {navLinks.map((link) => (
+              {isHomePage ? navLinks.map((link) => (
                 <a
                   key={link.id}
                   href={`#${link.id}`}
@@ -99,7 +116,15 @@ export const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) =
                 >
                   {link.name}
                 </a>
-              ))}
+              )) : (
+                <Link 
+                  to="/"
+                  className="text-gray-600 hover:text-red-500 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Back to Home
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -107,3 +132,5 @@ export const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) =
     </nav>
   );
 };
+
+export { Navbar };

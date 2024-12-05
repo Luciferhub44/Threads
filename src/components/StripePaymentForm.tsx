@@ -1,5 +1,5 @@
 import React from 'react';
-import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { CreditCard } from 'lucide-react';
 
 interface StripePaymentFormProps {
@@ -33,7 +33,7 @@ export const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
           <CreditCard className="h-5 w-5 text-gray-500" />
           <span className="text-sm font-medium text-gray-700">Payment Details</span>
         </div>
-        <PaymentElement
+        <CardElement
           options={{
             style: {
               base: {

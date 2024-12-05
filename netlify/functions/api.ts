@@ -10,7 +10,9 @@ import settingsRoutes from '../../server/routes/settingsRoutes';
 const api = express();
 
 // Connect to MongoDB
-connectDB();
+connectDB().catch(err => {
+  console.error('Failed to connect to MongoDB:', err);
+});
 
 // Middleware
 api.use(cors());

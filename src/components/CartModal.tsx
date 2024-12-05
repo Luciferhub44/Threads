@@ -12,7 +12,7 @@ interface CartModalProps {
   onRemoveItem: (id: string, size: string) => void;
 }
 
-export const CartModal: React.FC<CartModalProps> = ({
+const CartModal: React.FC<CartModalProps> = ({
   isOpen,
   onClose,
   items,
@@ -142,3 +142,5 @@ export const CartModal: React.FC<CartModalProps> = ({
     </>
   );
 };
+
+export { CartModal };
