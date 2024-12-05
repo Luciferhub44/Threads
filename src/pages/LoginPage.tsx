@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { setAuthToken } from '../utils/auth';
+import { setAuthToken, validateAdminPassword } from '../utils/auth';
 
 export const LoginPage: React.FC = () => {
   const [password, setPassword] = React.useState('');
@@ -17,9 +17,12 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      // For demo purposes, accept any password
-      setAuthToken('demo-token');
-      navigate(from, { replace: true });
+      if (validateAdminPassword(password)) {
+        setAuthToken('admin-token');
+        navigate(from, { replace: true });
+      } else {
+        throw new Error('Invalid password');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {

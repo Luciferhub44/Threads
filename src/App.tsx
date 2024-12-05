@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { ProductPage } from './pages/ProductPage';
@@ -14,6 +14,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { ScrollToTop } from './utils/ScrollToTop';
 import { loadContent } from './utils/contentManager';
 import { StoreSettings } from './types';
+import { isAuthenticated } from './utils/auth';
 
 const App: React.FC = () => {
   const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
@@ -77,7 +78,14 @@ const App: React.FC = () => {
               <ProductPage onAddToCart={handleAddToCart} />
             </Elements>
           } />
-          <Route path="/admin/*" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+          <Route 
+            path="/admin/*" 
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/login" element={<LoginPage />} />
         </Routes>
         <CartModal
