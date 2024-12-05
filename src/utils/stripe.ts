@@ -1,8 +1,8 @@
 import { loadStripe } from '@stripe/stripe-js';
+import { config } from '../config/payment';
 import { PaymentResult } from '../types';
-import { env } from '../config/env';
 
-export const stripePromise = loadStripe(env.stripePublishableKey);
+export const stripePromise = loadStripe(config.stripe.publishableKey);
 
 export const processStripePayment = async (amount: number): Promise<PaymentResult> => {
   const stripe = await stripePromise;
@@ -15,7 +15,7 @@ export const processStripePayment = async (amount: number): Promise<PaymentResul
       };
     }
 
-    const response = await fetch(`${env.apiUrl}/api/create-payment-intent`, {
+    const response = await fetch(`${config.apiUrl}/create-payment-intent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

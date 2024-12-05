@@ -1,21 +1,26 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { LazyMotion, domAnimation, AnimatePresence } from 'framer-motion';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { ErrorBoundary } from './utils/errorBoundary';
+import { config } from './config/payment';
 import App from './App.tsx';
 import './index.css';
 
+const paypalOptions = {
+  clientId: config.paypal.clientId,
+  currency: 'USD',
+  intent: 'capture',
+};
+
 createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  <StrictMode>
     <ErrorBoundary>
-      <Router>
-        <LazyMotion features={domAnimation} strict>
-          <AnimatePresence mode="wait">
-            <App />
-          </AnimatePresence>
-        </LazyMotion>
-      </Router>
+      <PayPalScriptProvider 
+        options={paypalOptions}
+        deferLoading={!config.paypal.clientId}
+      >
+        <App />
+      </PayPalScriptProvider>
     </ErrorBoundary>
-  </React.StrictMode>
+  </StrictMode>
 );

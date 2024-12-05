@@ -1,26 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 
-interface FooterProps {
-  logo?: string | null;
-}
-
-export const Footer: React.FC<FooterProps> = ({ logo }) => {
+export const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About Section */}
           <div className="space-y-4">
-            <Link to="/">
-              <img 
-                src={logo || '/threads-logo.png'}
-                alt="Threads - Donate Warmth, Share Comfort" 
-                className="w-32 h-auto brightness-0 invert object-contain" 
-                loading="lazy"
-              />
-            </Link>
+            <img src="/threads-logo.png" alt="Threads" className="w-32 h-auto brightness-0 invert" />
             <p className="text-sm">
               Empowering communities through warmth and comfort. Every donation makes a difference.
             </p>
@@ -42,19 +30,16 @@ export const Footer: React.FC<FooterProps> = ({ logo }) => {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="hover:text-red-500 transition-colors">Home</Link>
+                <a href="#" className="hover:text-red-500 transition-colors">About Us</a>
               </li>
               <li>
-                <Link to="/#mission" className="hover:text-red-500 transition-colors">About Us</Link>
+                <a href="#" className="hover:text-red-500 transition-colors">Our Mission</a>
               </li>
               <li>
-                <Link to="/#impact" className="hover:text-red-500 transition-colors">Our Impact</Link>
+                <a href="#" className="hover:text-red-500 transition-colors">Impact Stories</a>
               </li>
               <li>
-                <Link to="/#testimonials" className="hover:text-red-500 transition-colors">Impact Stories</Link>
-              </li>
-              <li>
-                <Link to="/#partners" className="hover:text-red-500 transition-colors">Partner With Us</Link>
+                <a href="#" className="hover:text-red-500 transition-colors">Partner With Us</a>
               </li>
             </ul>
           </div>

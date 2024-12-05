@@ -1,44 +1,41 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      'public': path.resolve(__dirname, 'public')
+      '@': resolve(__dirname, './src'),
+      'public': resolve(__dirname, './public')
     }
   },
   build: {
-    outDir: 'dist',
-    emptyOutDir: true,
     sourcemap: false,
     minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
+    cssMinify: true,
+    target: 'esnext',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
+          vendor: ['react', 'react-dom'],
           payment: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
-          motion: ['framer-motion'],
+          paypal: ['@paypal/react-paypal-js'],
           icons: ['lucide-react']
-        }
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
-    }
+    },
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    exclude: ['@stripe/stripe-js']
   },
   server: {
     port: 5173,
-    proxy: {
-      '/.netlify/functions/api': {
-        target: 'http://localhost:8888',
-        changeOrigin: true
-      }
-    }
+    strictPort: true
   }
 });

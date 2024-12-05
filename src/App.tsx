@@ -1,36 +1,18 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
-import { HomePage } from './pages/HomePage';
-import { ProductPage } from './pages/ProductPage';
-import { LoginPage } from './pages/LoginPage';
-import { AdminPage } from './pages/AdminPage';
+import { Hero } from './components/Hero';
+import { ProductGrid } from './components/ProductGrid';
 import { CartModal } from './components/CartModal';
+import { ImpactSection } from './components/ImpactSection';
+import { MissionSection } from './components/MissionSection';
+import { TestimonialSection } from './components/TestimonialSection';
+import { SponsorsSection } from './components/SponsorsSection';
 import { Footer } from './components/Footer';
 import { Product, CartItem } from './types';
-import { Elements } from '@stripe/react-stripe-js';
-import { stripePromise } from './utils/stripe';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { ScrollToTop } from './utils/ScrollToTop';
-import { loadContent } from './utils/contentManager';
-import { StoreSettings } from './types';
-import { isAuthenticated } from './utils/auth';
 
-const App: React.FC = () => {
+function App() {
   const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
-  const [homepageContent, setHomepageContent] = React.useState(loadContent());
-  const [settings] = React.useState<StoreSettings>(() => ({
-    storeName: 'Threads Charity',
-    logo: localStorage.getItem('store_logo') || null,
-    emailNotifications: true,
-    emailFrequency: 'instant',
-    currency: 'USD'
-  }));
-
-  React.useEffect(() => {
-    setHomepageContent(loadContent());
-  }, []);
 
   const handleAddToCart = (product: Product, size: string) => {
     setCartItems((prevItems) => {
@@ -59,45 +41,26 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-gray-50 pt-16">
-        <ScrollToTop />
-        <Navbar
-          cartItemsCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-          onCartClick={() => setIsCartOpen(true)}
-          logo={settings.logo}
-        />
-        <Routes>
-          <Route path="/" element={
-            <Elements stripe={stripePromise}>
-              <HomePage onAddToCart={handleAddToCart} content={homepageContent} />
-            </Elements>
-          } />
-          <Route path="/product/:id" element={
-            <Elements stripe={stripePromise}>
-              <ProductPage onAddToCart={handleAddToCart} />
-            </Elements>
-          } />
-          <Route 
-            path="/admin/*" 
-            element={
-              <ProtectedRoute>
-                <AdminPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/login" element={<LoginPage />} />
-        </Routes>
-        <CartModal
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          items={cartItems}
-          onRemoveItem={handleRemoveFromCart}
-        />
-        <Footer logo={settings.logo} />
-      </div>
-    </>
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <Navbar
+        cartItemsCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+        onCartClick={() => setIsCartOpen(true)}
+      />
+      <Hero />
+      <ImpactSection />
+      <MissionSection />
+      <ProductGrid onAddToCart={handleAddToCart} />
+      <TestimonialSection />
+      <SponsorsSection />
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+        onRemoveItem={handleRemoveFromCart}
+      />
+      <Footer />
+    </div>
   );
-};
+}
 
 export default App;

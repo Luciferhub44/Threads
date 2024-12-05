@@ -10,34 +10,3 @@ html {
 body {
   overflow-y: scroll;
 }
-
-/* Accessibility styles */
-.user-is-tabbing *:focus {
-  outline: 2px solid #ef4444 !important;
-  outline-offset: 2px !important;
-}
-
-/* Performance optimizations */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Image loading optimizations */
-.blur-load {
-  background-size: cover;
-  background-position: center;
-}
-
-.blur-load.loaded > img {
-  opacity: 1;
-}
-
-.blur-load > img {
-  opacity: 0;
-  transition: opacity 200ms ease-in-out;
-}

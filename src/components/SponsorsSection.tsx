@@ -1,30 +1,25 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
 
-import { SponsorContent } from '../types';
-
-interface SponsorsSectionProps {
-  content: SponsorContent;
+interface SponsorLogoProps {
+  name: string;
+  className?: string;
 }
 
-const SPONSORS_PER_PAGE = 4;
+const SponsorLogo: React.FC<SponsorLogoProps> = ({ name, className = "" }) => (
+  <div className={`bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md ${className}`}>
+    <span className="text-2xl font-bold text-gray-800">{name[0]}</span>
+  </div>
+);
 
-export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ content }) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const totalPages = Math.ceil(content.sponsors.length / SPONSORS_PER_PAGE);
-  
-  const visibleSponsors = content.sponsors.slice(
-    currentPage * SPONSORS_PER_PAGE,
-    (currentPage + 1) * SPONSORS_PER_PAGE
-  );
-
-  const nextPage = () => {
-    setCurrentPage((prev) => (prev + 1) % totalPages);
-  };
-
-  const prevPage = () => {
-    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
-  };
+export const SponsorsSection: React.FC = () => {
+  const sponsors = [
+    { name: 'Acme Corp', color: 'hover:text-blue-600' },
+    { name: 'Globex', color: 'hover:text-green-600' },
+    { name: 'Soylent', color: 'hover:text-purple-600' },
+    { name: 'Initech', color: 'hover:text-yellow-600' },
+    { name: 'Umbrella', color: 'hover:text-red-600' },
+    { name: 'Hooli', color: 'hover:text-indigo-600' },
+  ];
 
   return (
     <section id="partners" className="py-16">
@@ -38,58 +33,18 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ content }) => 
           </p>
         </div>
 
-        <div className="relative">
-          {totalPages > 1 && (
-            <>
-              <button
-                onClick={prevPage}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500"
-              >
-                <ChevronLeft className="h-6 w-6 text-gray-600" />
-              </button>
-              <button
-                onClick={nextPage}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500"
-              >
-                <ChevronRight className="h-6 w-6 text-gray-600" />
-              </button>
-            </>
-          )}
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center max-w-4xl mx-auto">
-            {visibleSponsors.map((sponsor, index) => (
-              <div key={sponsor.name} className="group cursor-pointer transition-transform hover:scale-110">
-                <div className="bg-white rounded-lg w-32 h-32 flex items-center justify-center shadow-md p-4">
-                  {sponsor.logo ? (
-                    <img
-                      src={sponsor.logo}
-                      alt={sponsor.name}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <span className="text-3xl font-bold text-gray-800">{sponsor.name[0]}</span>
-                  )}
-                </div>
-                <p className="mt-3 text-sm text-gray-600 text-center group-hover:font-medium">
-                  {sponsor.name}
-                </p>
-              </div>
-            ))}
-          </div>
-          
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-8 space-x-2">
-              {Array.from({ length: totalPages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    currentPage === index ? 'bg-red-500' : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
-                />
-              ))}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center">
+          {sponsors.map((sponsor, index) => (
+            <div key={sponsor.name} className="group cursor-pointer transition-transform hover:scale-110">
+              <SponsorLogo 
+                name={sponsor.name} 
+                className={`transition-colors ${sponsor.color}`}
+              />
+              <p className="mt-2 text-sm text-gray-600 text-center group-hover:font-medium">
+                {sponsor.name}
+              </p>
             </div>
-          )}
+          ))}
         </div>
 
         <div className="mt-12 text-center">

@@ -1,15 +1,20 @@
 const getEnvVar = (key: string, required = true): string => {
   const value = import.meta.env[key];
   if (required && !value) {
-    console.warn(`Missing environment variable: ${key}`);
+    throw new Error(`Missing required environment variable: ${key}`);
   }
   return value || '';
 };
 
+const isDevelopment = import.meta.env.DEV;
+
 export const config = {
-  environment: import.meta.env.DEV ? 'development' : 'production',
+  environment: isDevelopment ? 'development' : 'production',
   stripe: {
     publishableKey: getEnvVar('VITE_STRIPE_PUBLISHABLE_KEY'),
   },
-  apiUrl: `${getEnvVar('VITE_API_URL')}/api`,
+  paypal: {
+    clientId: getEnvVar('VITE_PAYPAL_CLIENT_ID'),
+  },
+  apiUrl: isDevelopment ? 'http://localhost:3000/api' : 'https://api.threads-charity.com/api',
 } as const;
