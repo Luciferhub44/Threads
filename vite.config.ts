@@ -1,22 +1,25 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      'public': resolve(__dirname, 'public')
+      '@': path.resolve(__dirname, 'src'),
+      'public': path.resolve(__dirname, 'public')
     }
   },
   build: {
     sourcemap: false,
     minify: 'terser',
+    outDir: 'dist',
+    emptyOutDir: true,
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug']
       }
     },
     cssMinify: true,
@@ -25,40 +28,41 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
+          vendor: ['react', 'react-dom', 'react-router-dom'],
           payment: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
-          router: ['react-router-dom'],
-          motion: ['framer-motion']
+          motion: ['framer-motion'],
+          icons: ['lucide-react']
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
-      },
-      treeshake: {
-        moduleSideEffects: true,
-        propertyReadSideEffects: false,
-        tryCatchDeoptimization: false
-      },
-    },
+      }
+    }
   },
   optimizeDeps: {
     include: ['react', 'react-dom'],
-    exclude: ['@stripe/stripe-js'],
-    esbuildOptions: {
-      target: 'esnext',
-      supported: {
-        'top-level-await': true
-      },
-    }
+    exclude: ['@stripe/stripe-js']
   },
   server: {
     port: 5173,
     strictPort: true,
-    headers: {
-      'Cache-Control': 'public, max-age=31536000',
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '1; mode=block'
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
+  preview: {
+    port: 4173,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
     }
   }
 });
